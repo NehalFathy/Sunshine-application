@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,6 +30,72 @@ public class ForecastFragment extends Fragment {
 
     public ForecastFragment() {
     }
+
+    //1--method u call tp tell fragment that it has menu options
+    //override on create
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Add this line in order for this fragment to handle menu events.
+        //true to indicate callback for the 2 & 3 methods
+        setHasOptionsMenu(true);
+    }
+
+    //2--inflate options menu in the fragment
+
+    /**
+     * Initialize the contents of the Activity's standard options menu.  You
+     * should place your menu items in to <var>menu</var>.  For this method
+     * to be called, you must have first called {@link #setHasOptionsMenu}.  See
+     //*  Activity#onCreateOptionsMenu(Menu) Activity.onCreateOptionsMenu}
+     * for more information.
+     *
+     * @param menu     The options menu in which you place your items.
+     * @param inflater
+     * @see #setHasOptionsMenu
+     * @see #onPrepareOptionsMenu
+     * @see #onOptionsItemSelected
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.forecastfragment, menu);
+    }
+
+    //3--set up OnOptionsItemSelected
+    /**
+     * This hook is called whenever an item in your options menu is selected.
+     * The default implementation simply returns false to have the normal
+     * processing happen (calling the item's Runnable or sending a message to
+     * its Handler as appropriate).  You can use this method for any items
+     * for which you would like to do processing without those other
+     * facilities.
+     * <p/>
+     * <p>Derived classes should call through to the base class for it to
+     * perform the default menu handling.
+     *
+     * @param item The menu item that was selected.
+     * @return boolean Return false to allow normal menu processing to
+     * proceed, true to consume it here.
+     * @see #onCreateOptionsMenu
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //when item is selected with id = action refresh is called
+        if (id == R.id.action_refresh) {
+
+            //to kickoff AsyncTask from refresh in menu
+            FetchWeatherTask weatherTask = new FetchWeatherTask();
+            weatherTask.execute();
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,6 +143,8 @@ public class ForecastFragment extends Fragment {
 
 
     //*************************************ASYNCTASK  ******************************************************************//
+    //change fetch weather task to take postcode as input param
+    //use uriBuilder to build up the URL
 
     public class FetchWeatherTask extends AsyncTask<Void, Void , Void>{
 
@@ -93,7 +164,7 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7");
+                URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=cairo,egypt&mode=json&units=metric&cnt=7&APPID=3271cd0f8a5920317edda6facfe25a2a");
 
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();

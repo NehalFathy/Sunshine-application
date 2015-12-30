@@ -2,9 +2,11 @@ package com.example.android.sunshine.app;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.format.Time;
 import android.util.Log;
@@ -96,11 +98,19 @@ public class ForecastFragment extends Fragment {
         //when item is selected with id = action refresh is called
         if (id == R.id.action_refresh) {
 
-            //to kickoff AsyncTask from refresh in menu
+           /* //to kickoff AsyncTask from refresh in menu
             FetchWeatherTask weatherTask = new FetchWeatherTask();
             //weatherTask.execute("94043"); //so we can pass in the postal code parameter when we execute that task
 
-            weatherTask.execute("cairo,egypt");
+            //weatherTask.execute("cairo,egypt");
+            //read from sharedpref when refresh is selected
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            //since it's key-value pairs .. we retrieve the value stored for that key
+            String location = prefs.getString(getString(R.string.pref_location_key),
+                    getString(R.string.pref_location_default)); //if no value stored fall back to defualt location
+            weatherTask.execute(location);*/
+            updateWeather();
+
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -111,6 +121,7 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        /*
         // Create some dummy data for the ListView.  Here's a sample weekly forecast
         String[] data = {
                 "Mon 6/23 - Sunny - 31/17",
@@ -130,12 +141,16 @@ public class ForecastFragment extends Fragment {
         // Now that we have some dummy forecast data, create an ArrayAdapter.
         // The ArrayAdapter will take data from a source (like our dummy forecast) and
         // use it to populate the ListView it's attached to.
+        */
+
+        /// The ArrayAdapter will take data from a source and
+        // use it to populate the ListView it's attached to.
         mForecastAdapter =
                 new ArrayAdapter<String>(
                         getActivity(), // The current context (this activity)
                         R.layout.list_item_forecast, // The name of the layout ID.
                         R.id.list_item_forecast_textview, // The ID of the textview to populate.
-                        weekForecast);
+                        new ArrayList<String>());  //instead of weekForecast
 
 
         //we inflate the fragment layout inside the "container" layout,
@@ -170,7 +185,20 @@ public class ForecastFragment extends Fragment {
         return rootView;
     }
 
+    //***********************************LOAD DATA ******************************************************************//
+    private void updateWeather() {
+                FetchWeatherTask weatherTask = new FetchWeatherTask();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                String location = prefs.getString(getString(R.string.pref_location_key),
+                                getString(R.string.pref_location_default));
+                weatherTask.execute(location);
+    }
 
+    @Override
+    public void onStart() {
+                super.onStart();
+                updateWeather();  //as its helper method we can call it from onstart
+    }
     //*************************************ASYNCTASK  ******************************************************************//
 
     //change fetch weather task to take postcode as input param
